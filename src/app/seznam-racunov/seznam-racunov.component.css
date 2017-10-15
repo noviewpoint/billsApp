@@ -1,0 +1,12 @@
+@media (min-width: 1000px) {
+    div#seznam {
+        margin-top: 50px;
+    }
+    div#seznam button {
+        margin-bottom: 25px;
+    }
+}
+
+div#seznam table th, td {
+    text-align: center;
+}

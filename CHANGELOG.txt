@@ -1,1 +1,4 @@
-Dodal bootstrap
+Naredil osnovni ui v html
+
+Dodal testne racune v komponenti 'seznam-racunov'. Seznam racunov je
+bootstrap tabela (naj bi bila responsive).

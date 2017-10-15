@@ -1,1 +1,5 @@
-Initial commit
+Dodal svoj streznik
+
+Dodal express in nekaj npm modulov.
+
+"node server.js postreze vsebino iz dist direktorija.

@@ -1,1 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* prefix ~ at the start of the path tells the Webpack loader to resolve the
+import "like a module" */
+@import '~bootstrap/dist/css/bootstrap.min.css';

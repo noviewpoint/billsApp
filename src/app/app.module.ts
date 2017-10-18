@@ -3,20 +3,20 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
-// import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
-
 import { AppComponent } from './app.component';
 import { SeznamRacunovComponent } from './seznam-racunov/seznam-racunov.component';
 import { NovRacunComponent } from './nov-racun/nov-racun.component';
-
 import { ApiCallsService } from './api-calls.service';
+import { IskanjePipe } from './iskanje.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
     SeznamRacunovComponent,
-    NovRacunComponent
+    NovRacunComponent,
+    IskanjePipe
   ],
   imports: [
     BrowserModule,
@@ -40,7 +40,7 @@ import { ApiCallsService } from './api-calls.service';
     ], {
       useHash: true /* NUJNO! Brez tega '/#' ob menjavi routa requestas node server za page, ki ga ta nima! */
     }),
-    // BrowserAnimationsModule
+    BrowserAnimationsModule,
     NgbModule.forRoot()
   ],
   providers: [ApiCallsService],

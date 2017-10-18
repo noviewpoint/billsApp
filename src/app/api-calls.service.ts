@@ -21,11 +21,8 @@ export class ApiCallsService {
     return this.http.get(this.billsApiAddress + "/" + id, this.prepareJsonHeader()).map(res => res.json());
   }
 
-  postBill(data) {
-    this.http.post(this.billsApiAddress, JSON.stringify(data), this.prepareJsonHeader())
-      .subscribe((res) => {
-        console.log(res.json());
-      });
+  postBill(data): Observable<any> {
+    return this.http.post(this.billsApiAddress, JSON.stringify(data), this.prepareJsonHeader()).map(res => res.json());
   }
 
   putBill(id, data) {

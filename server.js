@@ -93,7 +93,7 @@ function putBill(request, response) {
 
 function deleteBill(request, response) {
     console.log("DELETE request");
-    var id = req.params.id;
+    var id = request.params.id;
     db.bills.remove({
         _id: mongojs.ObjectId(id)
     }, (err, doc) => {

@@ -1,7 +1,9 @@
 <!-- MODEL DRIVEN FORM -->
-<form [formGroup] = "obrazec" (ngSubmit) = "submitBill(obrazec.value);">
+<form [formGroup] = "obrazec" (ngSubmit) = "submitBill(obrazec.value, content);">
 
-  <legend>Legend</legend>
+  <h1>Vnos računa</h1>
+
+  <legend>Podatki o stranki</legend>
 
   <div class="form-group row">
 
@@ -43,13 +45,10 @@
       <input type="text" name="_drzava" placeholder="Država" formControlName="drzava" class="form-control" id="_drzava">
     </div>
 
-    <!-- DATUM IZDAJE -->
-    <label for="_datumIzdaje" class="col-sm-2 col-form-label">Datum izdaje</label>
-    <div class="col-sm-4">
-      <input ngbDatepicker #date1="ngbDatepicker" (click)="date1.toggle()" type="text" name="_datumIzdaje" placeholder="Datum oblike yyyy-mm-dd" formControlName="datumIzdaje" class="form-control" id="_datumIzdaje">
-    </div>
 
   </div>
+
+  <legend>Ostalo</legend>
 
   <div class="form-group row">
 
@@ -69,13 +68,26 @@
 
   <div class="form-group row">
 
+    <!-- DATUM IZDAJE -->
+    <label for="_datumIzdaje" class="col-sm-2 col-form-label">Datum izdaje</label>
+    <div class="col-sm-4">
+      <input ngbDatepicker #date1="ngbDatepicker" (click)="date1.toggle()" type="text" name="_datumIzdaje" placeholder="Datum oblike yyyy-mm-dd" formControlName="datumIzdaje" class="form-control" id="_datumIzdaje">
+    </div>
+
+    <!-- STEVILKA RACUNA -->
+    <label for="_stevilkaRacuna" class="col-sm-2 col-form-label">Številka računa</label>
+    <div class="col-sm-4">
+      <input readonly type="text" name="_stevilkaRacuna" placeholder="Številka računa" formControlName="stevilkaRacuna" class="form-control" id="_stevilkaRacuna">
+    </div>
+
+  </div>
+
+  <div class="form-group row hideAtLowRes">
+
     <div class="col-sm-4"><strong>Storitev</strong></div>
     <div class="col-sm-2"><strong>Količina</strong></div>
     <div class="col-sm-2"><strong>Cena</strong></div>
     <div class="col-sm-2"><strong>DDV</strong></div>
-
-    <!-- ce ne gre za 'submit' button v formu, obvezno dopisi type="buton" - drugace angular avtomatsko prozi submit forma za klik na kakrsenkoli button -->
-    <div class="col-sm-2"><button (click)="addNewRow()" type="button" class="btn btn-primary btn-sm btn-block col-form-label">&#X25BC; Dodaj</button></div>
 
   </div>
   
@@ -97,26 +109,23 @@
           <input type="text" name="_cena" placeholder="Cena" formControlName="price" class="form-control" id="_cena">
         </div>
 
-        <div class="col-sm-2">
+        <div class="col-sm-2"> <!-- readonly -->
           <input type="text" name="_ddv" placeholder="DDV" formControlName="VAT" class="form-control" id="_ddv">
         </div>
 
         <div class="col-sm-2">
-          <button *ngIf="obrazec.controls.storitve.controls.length > 1" (click)="deleteRow(i)"  class="btn btn-danger btn-sm btn-block col-form-label offset-sm-1">&#X25C0; Briši</button>
+          <button *ngIf="obrazec.controls.storitve.controls.length > 1" (click)="deleteRow(i)"  class="btn btn-danger btn-sm btn-block col-form-label offset-sm-1">Briši</button> <!-- &#X25C0; --> 
         </div>
 
       </div>
     </div>
   </div>
 
-  <div class="form-group row">
+  <div class="form-group row d-flex justify-content-end">
 
-    <!-- STEVILKA RACUNA -->
-    <label for="_stevilkaRacuna" class="col-sm-2 col-form-label">Številka računa</label>
-    <div class="col-sm-4">
-      <input type="text" name="_stevilkaRacuna" placeholder="Številka računa" formControlName="stevilkaRacuna" class="form-control" id="_stevilkaRacuna">
-    </div>
-
+    <!-- ce ne gre za 'submit' button v formu, obvezno dopisi type="buton" - drugace angular avtomatsko prozi submit forma za klik na kakrsenkoli button -->
+    <div class="col-sm-6"><button (click)="addNewRow();" type="button" class="btn btn-secondary btn-sm btn-block col-form-label">&#X25B2; Dodaj</button></div>
+    
     <!-- ZNESEK -->
     <label for="_znesek" class="col-sm-2 col-form-label"><strong>Celotni znesek</strong></label>
     <div class="col-sm-4">
@@ -129,7 +138,7 @@
     <div class="row">
 
       <div class="col-sm-6">
-        <button type="submit" value="submit" [disabled] = "!obrazec.valid" class="btn btn-primary btn-block">Izdelaj</button>
+        <button type="submit" value="submit" [disabled] = "!obrazec.valid" class="btn btn-primary btn-block">Izdaj</button>
       </div>
 
       <div class="col-sm-6">
@@ -141,3 +150,29 @@
   </div>
 
 </form>
+
+<!-- https://ng-bootstrap.github.io/#/components/modal/examples -->
+<ng-template #content let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">{{modalText.header}}</h4>
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p>{{modalText.body}}</p>
+    <div *ngIf="modalAnimationFlag" id="fountainG">
+      <div id="fountainG_1" class="fountainG"></div>
+      <div id="fountainG_2" class="fountainG"></div>
+      <div id="fountainG_3" class="fountainG"></div>
+      <div id="fountainG_4" class="fountainG"></div>
+      <div id="fountainG_5" class="fountainG"></div>
+      <div id="fountainG_6" class="fountainG"></div>
+      <div id="fountainG_7" class="fountainG"></div>
+      <div id="fountainG_8" class="fountainG"></div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">OK</button>
+  </div>
+</ng-template>

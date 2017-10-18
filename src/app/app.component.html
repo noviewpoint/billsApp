@@ -1,8 +1,8 @@
 <!--The content below is only a placeholder and can be replaced.-->
 <div class="container">
-  <h1>
-      Pozdravljen, {{user}}
-  </h1>
+  <div class="top">
+    <button class="btn btn-link" (click)="logout();">Odjavi <i>{{user}}</i></button>
+  </div>
   <!-- tukaj vstavlja route -->
   <router-outlet></router-outlet>
 </div>

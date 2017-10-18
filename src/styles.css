@@ -4,6 +4,6 @@
 import "like a module" */
 @import '~bootstrap/dist/css/bootstrap.min.css'; /* bootstrap 4 beta */
 
-button {
+button { /* bootstrap 4 default nima tako */
     cursor: pointer;
 }

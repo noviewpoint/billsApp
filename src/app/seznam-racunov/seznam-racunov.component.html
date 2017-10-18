@@ -1,20 +1,22 @@
 <div id="seznam" class="table-responsive"> <!-- enables horizontal scroll on small devices under 768px -->
-  <button class="btn btn-primary btn-lg btn-block" [routerLink] = "['/nov']">Izdelaj nov račun</button>
+
+  <legend>Seznam računov</legend>
+
+  <button class="btn btn-primary btn-lg btn-block" [routerLink] = "['/nov']">Izdaj nov račun</button>
+  
+  <input [(ngModel)]="searchText" class="form-control" type="search" placeholder="Išči med računi">
+  
   <table class="table table-striped table-hover">
     <thead>
       <tr>
         <th>Stranka</th>
-        <th>Cena</th>
+        <th>Znesek</th>
         <th>Datum</th>
-        <th>Izdelal</th>
-        <!-- <th>&nbsp;</th>
-        <th>&nbsp;</th>
-        <th>&nbsp;</th>
-        <th>&nbsp;</th> -->
+        <th>Izdal</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let e of bills | async; let i = index;">
+      <tr *ngFor="let e of bills | async | iskanje: {stranka: searchText, znesek: searchText, drzava: searchText} : false; let i = index;">
         <td>{{e.stranka}}</td>
         <td>{{e.znesek | currency: "EUR": true}}</td>
         <td>{{e.datumIzdaje | date: "dd-MM-yyyy"}}</td>
@@ -22,8 +24,25 @@
         <td><button class="btn btn-sm btn-info" (click) = "print(e._id);">Natisni</button></td>
         <td><button class="btn btn-sm btn-success" (click) = "toPdf(e._id);">PDF</button></td>
         <td><button class="btn btn-sm btn-warning" (click) = "edit(e._id, e);">Spremeni</button></td>
-        <td><button class="btn btn-sm btn-danger" (click) = "remove(e._id);">Odstrani</button></td>
+        <td><button class="btn btn-sm btn-danger" (click) = "remove(e._id, content);">Odstrani</button></td>
       </tr>
     </tbody>
   </table>
 </div>
+
+<!-- https://ng-bootstrap.github.io/#/components/modal/examples -->
+<ng-template #content let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">Brisanje računa</h4>
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p>Ali ste prepričani</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="c('OK')">OK</button>
+    <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">Prekliči</button>
+  </div>
+</ng-template>

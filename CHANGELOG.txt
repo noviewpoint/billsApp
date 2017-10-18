@@ -1,22 +1,9 @@
-Big update
+Dodal modal okna in izboljsal validacijo
 
-Ustvaril komponento 'nov-racun'.
+Dodal pipe za search box. Dodal search box na '/seznam'.
 
-Izboljsal html vmesnik v komponenti 'seznam', dodal model driven form
-na 'nov-racun', dodal dva osnovna routa: 'seznam' in 'nov'.
+Dodal modal okno za izdajo racuna na '/nov'. Dodal modal okno za
+brisanje racuna na '/seznam'.
 
-Vkljucil bootstrap 4 beta, dodal ng bootstrap: https://ng-
-bootstrap.github.io/#/components/datepicker/examples
-
-Uporabil FormArray za dinamicno dodajanje fieldov na form. Dodal
-validacijo forma.
-
-Ustvaril service, ki se bavi s http klici (v komponente vrne ti.
-Observables).
-
-Dodal, da se node server connecta do MongoDB in iz nje pobere dummy
-podatke. Testiram razne node module za delo s PDF (glej package.json)
-- zaenkrat nic ne dela...
-
-Ustvaril nov direktorij /server (notri api klici za node server)
-in ga dodal v .gitignore.
+Izboljsal validacijo forma za nov racun (regexi za preverjanje
+stevil). Dodal loading animacijo v css na modal okno na '/nov'.

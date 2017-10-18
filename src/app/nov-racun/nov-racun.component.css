@@ -1,0 +1,13 @@
+.ng-invalid:not(form):not(.angularFormArray)  {
+    transition: all 0.5s;
+    border-left: 5px solid #a94442; /* red */
+}
+
+input[type=text] {
+    line-height: 1.3em;
+}
+
+.ng-valid:not(form):not(.angularFormArray) {
+    transition: all 0.5s;
+    border-right: 5px solid #42A948; /* green */
+}

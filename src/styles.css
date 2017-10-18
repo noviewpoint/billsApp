@@ -2,4 +2,8 @@
 
 /* prefix ~ at the start of the path tells the Webpack loader to resolve the
 import "like a module" */
-@import '~bootstrap/dist/css/bootstrap.min.css';
+@import '~bootstrap/dist/css/bootstrap.min.css'; /* bootstrap 4 beta */
+
+button {
+    cursor: pointer;
+}

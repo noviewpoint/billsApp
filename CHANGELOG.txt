@@ -1,4 +1,22 @@
-Naredil osnovni ui v html
+Big update
 
-Dodal testne racune v komponenti 'seznam-racunov'. Seznam racunov je
-bootstrap tabela (naj bi bila responsive).
+Ustvaril komponento 'nov-racun'.
+
+Izboljsal html vmesnik v komponenti 'seznam', dodal model driven form
+na 'nov-racun', dodal dva osnovna routa: 'seznam' in 'nov'.
+
+Vkljucil bootstrap 4 beta, dodal ng bootstrap: https://ng-
+bootstrap.github.io/#/components/datepicker/examples
+
+Uporabil FormArray za dinamicno dodajanje fieldov na form. Dodal
+validacijo forma.
+
+Ustvaril service, ki se bavi s http klici (v komponente vrne ti.
+Observables).
+
+Dodal, da se node server connecta do MongoDB in iz nje pobere dummy
+podatke. Testiram razne node module za delo s PDF (glej package.json)
+- zaenkrat nic ne dela...
+
+Ustvaril nov direktorij /server (notri api klici za node server)
+in ga dodal v .gitignore.

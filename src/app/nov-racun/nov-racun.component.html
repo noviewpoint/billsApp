@@ -1,0 +1,143 @@
+<!-- MODEL DRIVEN FORM -->
+<form [formGroup] = "obrazec" (ngSubmit) = "submitBill(obrazec.value);">
+
+  <legend>Legend</legend>
+
+  <div class="form-group row">
+
+    <!-- IME STRANKE -->
+    <label for="_stranka" class="col-sm-2 col-form-label">Kupec</label>
+    <div class="col-sm-4">
+      <input type="text" name="_stranka" placeholder="Ime stranke" formControlName="stranka" class="form-control" id="_stranka">
+    </div>
+
+    <!-- DAVCNA STEVILKA -->
+    <label for="_davcna" class="col-sm-2 col-form-label">Davčna številka</label>
+    <div class="col-sm-4">
+      <input type="text" name="_davcna" placeholder="Davčna števika" formControlName="davcna" class="form-control" id="_davcna">
+    </div>
+
+  </div>
+
+  <div class="form-group row">
+
+    <!-- NASLOV -->
+    <label for="_naslov" class="col-sm-2 col-form-label">Naslov</label>
+    <div class="col-sm-4">
+      <input type="text" name="_naslov" placeholder="Naslov" formControlName="naslov" class="form-control" id="_naslov">
+    </div>
+
+    <!-- POSTNA STEVILKA -->
+    <label for="_postnaStevilka" class="col-sm-2 col-form-label">Poštna številka</label>
+    <div class="col-sm-4">
+      <input type="text" name="_postnaStevilka" placeholder="Poštna številka" formControlName="postnaStevilka" class="form-control" id="_postnaStevilka">
+    </div>
+
+  </div>
+
+  <div class="form-group row">
+
+    <!-- DRZAVA -->
+    <label for="_drzava" class="col-sm-2 col-form-label">Država</label>
+    <div class="col-sm-4">
+      <input type="text" name="_drzava" placeholder="Država" formControlName="drzava" class="form-control" id="_drzava">
+    </div>
+
+    <!-- DATUM IZDAJE -->
+    <label for="_datumIzdaje" class="col-sm-2 col-form-label">Datum izdaje</label>
+    <div class="col-sm-4">
+      <input ngbDatepicker #date1="ngbDatepicker" (click)="date1.toggle()" type="text" name="_datumIzdaje" placeholder="Datum oblike yyyy-mm-dd" formControlName="datumIzdaje" class="form-control" id="_datumIzdaje">
+    </div>
+
+  </div>
+
+  <div class="form-group row">
+
+    <!-- DATUM STORITVE -->
+    <label for="_datumStoritve" class="col-sm-2 col-form-label">Datum storitve</label>
+    <div class="col-sm-4">
+      <input ngbDatepicker #date2="ngbDatepicker" (click)="date2.toggle()" type="text" name="_datumStoritve" placeholder="Datum oblike yyyy-mm-dd" formControlName="datumStoritve" class="form-control" id="_datumStoritve">
+    </div>
+
+    <!-- ROK PLACILA -->
+    <label for="_rokPlacila" class="col-sm-2 col-form-label">Rok plačila</label>
+    <div class="col-sm-4">
+      <input ngbDatepicker #date3="ngbDatepicker" (click)="date3.toggle()" type="text" name="_rokPlacila" placeholder="Datum oblike yyyy-mm-dd" formControlName="rokPlacila" class="form-control" id="_rokPlacila">
+    </div>
+
+  </div>
+
+  <div class="form-group row">
+
+    <div class="col-sm-4"><strong>Storitev</strong></div>
+    <div class="col-sm-2"><strong>Količina</strong></div>
+    <div class="col-sm-2"><strong>Cena</strong></div>
+    <div class="col-sm-2"><strong>DDV</strong></div>
+
+    <!-- ce ne gre za 'submit' button v formu, obvezno dopisi type="buton" - drugace angular avtomatsko prozi submit forma za klik na kakrsenkoli button -->
+    <div class="col-sm-2"><button (click)="addNewRow()" type="button" class="btn btn-primary btn-sm btn-block col-form-label">&#X25BC; Dodaj</button></div>
+
+  </div>
+  
+  <div class="angularFormArray" formArrayName="storitve">
+    <!-- Check the correct way to iterate your form array -->
+    <div class="angularFormArray" *ngFor="let itemrow of obrazec.controls.storitve.controls; let i=index" [formGroupName]="i">
+
+      <div class="form-group row angularFormArray">
+
+        <div class="col-sm-4">
+          <input type="text" name="_storitev" placeholder="Storitev" formControlName="name" class="form-control" id="_storitev">
+        </div>
+
+        <div class="col-sm-2">
+          <input type="text" name="_kolicina" placeholder="Količina" formControlName="quantity" class="form-control" id="_kolicina">
+        </div>
+
+        <div class="col-sm-2">
+          <input type="text" name="_cena" placeholder="Cena" formControlName="price" class="form-control" id="_cena">
+        </div>
+
+        <div class="col-sm-2">
+          <input type="text" name="_ddv" placeholder="DDV" formControlName="VAT" class="form-control" id="_ddv">
+        </div>
+
+        <div class="col-sm-2">
+          <button *ngIf="obrazec.controls.storitve.controls.length > 1" (click)="deleteRow(i)"  class="btn btn-danger btn-sm btn-block col-form-label offset-sm-1">&#X25C0; Briši</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group row">
+
+    <!-- STEVILKA RACUNA -->
+    <label for="_stevilkaRacuna" class="col-sm-2 col-form-label">Številka računa</label>
+    <div class="col-sm-4">
+      <input type="text" name="_stevilkaRacuna" placeholder="Številka računa" formControlName="stevilkaRacuna" class="form-control" id="_stevilkaRacuna">
+    </div>
+
+    <!-- ZNESEK -->
+    <label for="_znesek" class="col-sm-2 col-form-label"><strong>Celotni znesek</strong></label>
+    <div class="col-sm-4">
+      <input type="text" name="znesek" placeholder="Vsota" formControlName="znesek" class="form-control" id="_znesek">
+    </div>
+
+  </div>
+  
+  <div class="btn-group-justified">
+    <div class="row">
+
+      <div class="col-sm-6">
+        <button type="submit" value="submit" [disabled] = "!obrazec.valid" class="btn btn-primary btn-block">Izdelaj</button>
+      </div>
+
+      <div class="col-sm-6">
+        <!-- ob kliku nazaj node server dobi request, zakaj? -->
+        <button id="nazajButton" class="btn btn-success btn-block" [routerLink] = "['/seznam']">&#X25C0; Nazaj na seznam</button>
+      </div>
+
+    </div>
+  </div>
+
+</form>

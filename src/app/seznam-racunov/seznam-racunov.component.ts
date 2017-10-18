@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { ApiCallsService } from '../api-calls.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-seznam-racunov',
@@ -7,128 +9,51 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SeznamRacunovComponent implements OnInit {
 
-  constructor() { }
+  constructor(private service: ApiCallsService) { }
 
+  bills: Observable<any>;
   ngOnInit() {
-    
+    this.refreshData();
   }
 
-  bills = [{
-    "costumer": "SVEA",
-    "price": 200,
-    "date": new Date(2000, 3, 3),
-    "user": "David"
-  }, {
-    "costumer": "Tuš",
-    "price": 300,
-    "date": new Date(2016, 5, 17),
-    "user": "David"
-  }, {
-    "costumer": "Spar",
-    "price": 1.99,
-    "date": new Date(2017, 10, 14),
-    "user": "David"
-  }, {
-    "costumer": "Ikea",
-    "price": 1099.99,
-    "date": new Date(2017, 10, 15),
-    "user": "Kristina"
-  }, {
-    "costumer": "SVEA",
-    "price": 200,
-    "date": new Date(2000, 3, 3),
-    "user": "David"
-  }, {
-    "costumer": "Tuš",
-    "price": 300,
-    "date": new Date(2016, 5, 17),
-    "user": "David"
-  }, {
-    "costumer": "Spar",
-    "price": 1.99,
-    "date": new Date(2017, 10, 14),
-    "user": "David"
-  }, {
-    "costumer": "Ikea",
-    "price": 1099.99,
-    "date": new Date(2017, 10, 15),
-    "user": "Kristina"
-  }, {
-    "costumer": "SVEA",
-    "price": 200,
-    "date": new Date(2000, 3, 3),
-    "user": "David"
-  }, {
-    "costumer": "Tuš",
-    "price": 300,
-    "date": new Date(2016, 5, 17),
-    "user": "David"
-  }, {
-    "costumer": "Spar",
-    "price": 1.99,
-    "date": new Date(2017, 10, 14),
-    "user": "David"
-  }, {
-    "costumer": "Ikea",
-    "price": 1099.99,
-    "date": new Date(2017, 10, 15),
-    "user": "Kristina"
-  }, {
-    "costumer": "SVEA",
-    "price": 200,
-    "date": new Date(2000, 3, 3),
-    "user": "David"
-  }, {
-    "costumer": "Tuš",
-    "price": 300,
-    "date": new Date(2016, 5, 17),
-    "user": "David"
-  }, {
-    "costumer": "Spar",
-    "price": 1.99,
-    "date": new Date(2017, 10, 14),
-    "user": "David"
-  }, {
-    "costumer": "Ikea",
-    "price": 1099.99,
-    "date": new Date(2017, 10, 15),
-    "user": "Kristina"
-  }, {
-    "costumer": "SVEA",
-    "price": 200,
-    "date": new Date(2000, 3, 3),
-    "user": "David"
-  }, {
-    "costumer": "Tuš",
-    "price": 300,
-    "date": new Date(2016, 5, 17),
-    "user": "David"
-  }, {
-    "costumer": "Spar",
-    "price": 1.99,
-    "date": new Date(2017, 10, 14),
-    "user": "David"
-  }, {
-    "costumer": "Ikea",
-    "price": 1099.99,
-    "date": new Date(2017, 10, 15),
-    "user": "Kristina"
-  }];
-
-  remove = function(elementIndex) {
-
+  refreshData() {
+    this.bills = this.service.getBill();
   }
 
-  edit = function(elementIndex) {
+  print = function(id) {
+    console.log(id);
 
+    this.service.getBill(id).subscribe(res => {
+      console.log(res);
+    });
+
+    // window.print();
   }
 
-  toPdf = function(elementIndex) {
+  toPdf = function(id) {
+    console.log(id);
 
+    this.service.getBill(id).subscribe(res => {
+      console.log(res);
+    });
+  }
+  
+  edit = function(id, data) {
+    console.log(id, data);
+
+    this.service.putBill(id, data).subscribe(res => {
+      console.log(res);
+      this.refreshData();
+    });
   }
 
-  createNewBill = function() {
+  remove = function(id) {
+    console.log(id);
 
+    this.service.deleteBill(id).subscribe(res => {
+      console.log(res);
+      this.refreshData();
+    });    
   }
 
 }

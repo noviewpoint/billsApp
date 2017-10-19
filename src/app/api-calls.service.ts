@@ -48,7 +48,16 @@ export class ApiCallsService {
       id = "";
     }
 
-    return this.http.get(this.pdfApiAddress + "/" + id, this.preparePdfHeader()).map(res => res.arrayBuffer);
+    return this.http.get(this.pdfApiAddress + "-dl/" + id, this.preparePdfHeader()).map(res => res.arrayBuffer);
+  }
+
+  printPdf(id): Observable<any> {
+    
+    if (id === undefined) {
+      id = "";
+    }
+
+    return this.http.get(this.pdfApiAddress + "-print/" + id, this.preparePdfHeader()).map(res => res.arrayBuffer);
   }
 
   prepareJsonHeader() {

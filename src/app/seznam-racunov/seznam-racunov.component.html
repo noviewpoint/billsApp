@@ -22,7 +22,7 @@
         <td>{{e.datumIzdaje | date: "dd-MM-yyyy"}}</td>
         <td>{{e.vpisal}}</td>
         <td><button class="btn btn-sm btn-info" (click) = "print(e._id);">Natisni</button></td>
-        <td><button class="btn btn-sm btn-success" (click) = "toPdf(e._id);">Odpri PDF</button></td>
+        <td><button class="btn btn-sm btn-success" (click) = "toPdf(e._id);">Shrani PDF</button></td>
         <td><button class="btn btn-sm btn-warning" (click) = "edit(e);">Spremeni</button></td>
         <td><button class="btn btn-sm btn-danger" (click) = "remove(content, e._id);">Odstrani</button></td>
       </tr>

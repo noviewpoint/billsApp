@@ -1,10 +1,3 @@
-Posodobitve
+Pisanje navodil
 
-Preimenoval komponento 'nov-racun' v 'racun'.
-
-Dodal posodabljanje in brisanje racuna (http put in delete).
-
-Zametki avtentikacije (Service 'authorization').
-
-Dodal service za prenasanje podatkov med komponentami, 'shared-
-podatki'.
+etc

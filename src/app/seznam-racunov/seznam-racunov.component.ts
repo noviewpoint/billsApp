@@ -53,15 +53,19 @@ export class SeznamRacunovComponent implements OnInit {
     this.bills = this.service.getBill();
   }
 
-  print = function(id) {
-    console.log(id);
+  toPdf = function(id) {
+    this.service.printPdf(id).subscribe(res => {
+      // const blob = new Blob([res], {type: 'application/pdf'});
+      // const url = window.URL.createObjectURL(blob);
+      window.open("/pdfs-print/" + id);
+    });
   }
 
-  toPdf = function(id) {
+  print = function(id) {
     this.service.getPdf(id).subscribe(res => {
       // const blob = new Blob([res], {type: 'application/pdf'});
       // const url = window.URL.createObjectURL(blob);
-      window.open("/pdfs/" + id);
+      window.open("/pdfs-dl/" + id);
     });
   }
   

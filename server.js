@@ -40,7 +40,8 @@ function setRoutes() {
     app.post("/bills", postBill);
     app.put("/bills/:id", putBill);
     app.delete("/bills/:id", deleteBill);
-    app.get("/pdfs/:id", getPdf);
+    app.get("/pdfs-dl/:id", getPdfDownload);
+    app.get("/pdfs-print/:id", getPdfPrint);
 }
 
 function getBills(request, response) {
@@ -99,7 +100,7 @@ function deleteBill(request, response) {
     });
 }
 
-function getPdf(request, response) {
+function getPdfDownload(request, response) {
     console.log("GET request");
     var id = request.params.id;
 
@@ -112,45 +113,67 @@ function getPdf(request, response) {
         _id: mongojs.ObjectId(id)
     }, (err, doc) => {
         console.log(doc);
-        sendPdfFromDisk(response, doc);
+        sendPdfFromDiskDownload(response, doc);
     });
 }
 
-function sendPdfFromDisk(response, data) {
-    var file = path.join(__dirname, "./server/Racun.html"); // Racun.pdf
+function getPdfPrint(request, response) {
+    console.log("GET request");
+    var id = request.params.id;
 
-    // response.download(file, function (err) { // downloada v broserju
-    //     if (err) {
-    //         console.log("Error");
-    //         console.log(err);
-    //     } else {
-    //         console.log("Success");
-    //     }
-    // });
+    if (!id) {
+        throw "No element specified through url";
+        return;
+    }
 
-    // fs.readFile(file, function (err, data){ // odpre v browserju
-    //     response.contentType("application/pdf");
-    //     response.send(data);
-    // });
+    db.bills.findOne({
+        _id: mongojs.ObjectId(id)
+    }, (err, doc) => {
+        console.log(doc);
+        sendPdfFromDiskPrint(response, doc);
+    });
+}
 
-    // var html = fs.readFileSync('./server/Racun.html', 'utf8');
+function sendPdfFromDiskDownload(response, data) {
+    var file = path.join(__dirname, "./server/Racun.html");
     var html = changeHTMLTemplate(data);
     var base = "file://" + __dirname + "/server/";
-    // console.log("BASE JE: %s".red, base);
     var options = { format: 'A4', base: base  }; // file:///C:/Users/david/Desktop/kalmia/newWay/billsApp/server/
 
-    pdf.create(html, options).toFile('./server/businesscard2.pdf', function(err, res) {
+    pdf.create(html, options).toFile('./server/temp.pdf', function(err, res) {
         if (err) return console.log(err);
-        // console.log(res); // { filename: '/app/businesscard.pdf' }
 
         response.contentType("application/pdf");
         
-        fs.readFile('./server/businesscard2.pdf', function (err, data){ // odpre v browserju
+        fs.readFile('./server/temp.pdf', function (err, data){ // odpre v browserju
             if (err) return console.log(err);
             response.contentType("application/pdf");
             response.send(data);
         });
+    });
+}
+
+function sendPdfFromDiskPrint(response, data) {
+    var file = path.join(__dirname, "./server/Racun.html");
+    var html = changeHTMLTemplate(data);
+    var base = "file://" + __dirname + "/server/";
+    var options = { format: 'A4', base: base  }; // file:///C:/Users/david/Desktop/kalmia/newWay/billsApp/server/
+
+    pdf.create(html, options).toFile('./server/temp.pdf', function(err, res) {
+        if (err) return console.log(err);
+
+        response.contentType("application/pdf");
+
+        response.download('./server/temp.pdf', function (err) { // downloada v broserju
+            if (err) {
+                console.log("Error");
+                console.log(err);
+            } else {
+                console.log("Success");
+            }
         });
+        
+    });
 }
 
 /* -------------------- LOG FUNCTIONS -------------------- */
@@ -178,97 +201,7 @@ function logMongoDelete() {
 }
 
 
-// function ustvariPdf() {
-//     var doc = new pdfkit();
-//     doc.pipe(fs.createWriteStream("./server/file.pdf"));
-    
-//     // Set a title and pass the X and Y coordinates
-//     doc.fontSize(15).text('Wally Gator !', 50, 50);
-//     // Set the paragraph width and align direction
-//     doc.text('Wally Gator is a swinging alligator in the swamp. He\'s the greatest percolator when he really starts to romp. There has never been a greater operator in the swamp. See ya later, Wally Gator.', {
-//         width: 410,
-//         align: 'left'
-//     });
-
-//     doc.end();
-
-
-//     let pdfParser = new pdf2json();
-
-//     pdfParser.on("pdfParser_dataError", errData => console.error(errData.parserError) );
-//     pdfParser.on("pdfParser_dataReady", pdfData => {
-//         fs.writeFile("./server/test.json", JSON.stringify(pdfData));
-//     });
- 
-//     pdfParser.loadPDF("./server/Racun.pdf");
-
-
-//     let pdfParser2 = new pdf2json(this, 1);
-
-//     pdfParser2.on("pdfParser_dataError", errData => console.error(errData.parserError) );
-//     pdfParser2.on("pdfParser_dataReady", pdfData => {
-//         fs.writeFile("./server/nov.txt", pdfParser.getRawTextContent());
-//     });
-
-//     pdfParser2.load("./server/test.json");
-//     let jsonToPdf = new json2pdf();
-//     console.log(json2pdf);
-
-//     var pdf = require('html-pdf');
-//     var html = fs.readFileSync('./server/Racun4.html', 'utf8');
-//     var options = { format: 'Letter' };
-     
-//     pdf.create(html, options).toFile('./server/businesscard.pdf', function(err, res) {
-//       if (err) return console.log(err);
-//       console.log(res); // { filename: '/app/businesscard.pdf' }
-//     });
-
-    // // create a document and pipe to a blob
-    // var doc = new PDFDocument();
-    // var stream = doc.pipe(blobStream());
-
-    // // draw some text
-    // doc.fontSize(25)
-    // .text('Here is some vector graphics...', 100, 80);
-    
-    // // some vector graphics
-    // doc.save()
-    // .moveTo(100, 150)
-    // .lineTo(100, 250)
-    // .lineTo(200, 250)
-    // .fill("#FF3300");
-    
-    // doc.circle(280, 200, 50)
-    // .fill("#6600FF");
-    
-    // // an SVG path
-    // doc.scale(0.6)
-    // .translate(470, 130)
-    // .path('M 250,75 L 323,301 131,161 369,161 177,301 z')
-    // .fill('red', 'even-odd')
-    // .restore();
-    
-    // // and some justified text wrapped into columns
-    // doc.text('And here is some wrapped text...', 100, 300)
-    // .font('Times-Roman', 13)
-    // .moveDown()
-    // .text(lorem, {
-    //     width: 412,
-    //     align: 'justify',
-    //     indent: 30,
-    //     columns: 2,
-    //     height: 300,
-    //     ellipsis: true
-    // });
-    
-    // // end and display the document in the iframe to the right
-    // doc.end();
-    // stream.on('finish', function() {
-    //     iframe.src = stream.toBlobURL('application/pdf');
-    // });
-    //response.json(docs);
-// }
-
+/* -------------------- GENERATE PDF -------------------- */
 function getHumanReadableDate(x) {
     return x.getDate() + "." + (x.getMonth() + 1) + "." + x.getFullYear();
 }

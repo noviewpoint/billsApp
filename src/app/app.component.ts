@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AuthorizationService } from './authorization.service';
 
 @Component({
   selector: 'app-root',
@@ -6,9 +7,15 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  user = 'David'
+  /* https://toddmotto.com/angular-2-authentication */
+  constructor(private authorization: AuthorizationService) { }
 
-  logout() { // TO DO
-    alert("Logging out!");
+  login() {
+    this.authorization.login();
   }
+  logout() {
+    this.authorization.logout();
+  }
+
+  user = 'David';
 }

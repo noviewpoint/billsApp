@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NovRacunComponent } from './nov-racun.component';
+import { RacunComponent } from './racun.component';
 
 describe('NovRacunComponent', () => {
-  let component: NovRacunComponent;
-  let fixture: ComponentFixture<NovRacunComponent>;
+  let component: RacunComponent;
+  let fixture: ComponentFixture<RacunComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ NovRacunComponent ]
+      declarations: [ RacunComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NovRacunComponent);
+    fixture = TestBed.createComponent(RacunComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

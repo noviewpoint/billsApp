@@ -7,15 +7,17 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { AppComponent } from './app.component';
 import { SeznamRacunovComponent } from './seznam-racunov/seznam-racunov.component';
-import { NovRacunComponent } from './nov-racun/nov-racun.component';
+import { RacunComponent } from './racun/racun.component';
 import { ApiCallsService } from './api-calls.service';
 import { IskanjePipe } from './iskanje.pipe';
+import { AuthorizationService } from './authorization.service';
+import { SharedPodatkiService } from './shared-podatki.service';
 
 @NgModule({
   declarations: [
     AppComponent,
     SeznamRacunovComponent,
-    NovRacunComponent,
+    RacunComponent,
     IskanjePipe
   ],
   imports: [
@@ -34,8 +36,8 @@ import { IskanjePipe } from './iskanje.pipe';
         component: SeznamRacunovComponent
       },
       {
-        path: 'nov',
-        component: NovRacunComponent
+        path: 'racun',
+        component: RacunComponent
       }
     ], {
       useHash: true /* NUJNO! Brez tega '/#' ob menjavi routa requestas node server za page, ki ga ta nima! */
@@ -43,7 +45,7 @@ import { IskanjePipe } from './iskanje.pipe';
     BrowserAnimationsModule,
     NgbModule.forRoot()
   ],
-  providers: [ApiCallsService],
+  providers: [ApiCallsService, AuthorizationService, SharedPodatkiService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

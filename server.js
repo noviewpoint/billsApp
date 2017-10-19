@@ -45,7 +45,8 @@ function setRoutes() {
 
 function getBills(request, response) {
     console.log("GET request");
-    db.bills.find((err, docs) => {
+    db.bills.find().sort({znesek: 1}, (err, docs) => {
+        console.log(docs);
         response.json(docs);
         logMongoSelect();
     });
@@ -75,21 +76,15 @@ function putBill(request, response) {
     var id = request.params.id;
 
     console.log(request.body, id);
-    // var celObjekt = request.body;
+    var celObjekt = request.body;
 
-    db.bills.findAndModify({
-        query: {
-            _id: mongojs.ObjectId(id)
-        },
-        update: {
-            $set: {
-                drzava: "Alžiristan"
-            }
-        },
-        new: true
+    db.bills.findOne({
+        _id: mongojs.ObjectId(id)
     }, (err, doc) => {
-        response.json(doc);
-        logMongoUpdate();
+        db.bills.update(doc, celObjekt, (err, doc) => {
+            response.json(doc);
+            logMongoUpdate();
+        });
     });
 }
 
@@ -373,18 +368,19 @@ function changeHTMLTemplate(data) {
     
         <p class="s1" style="padding-left: 8pt;text-indent: 0pt;text-align: left;">${data.stranka}</p>
         <p class="s1" style="padding-left: 8pt;text-indent: 0pt;text-align: left;">${data.naslov}</p>
-        <p class="s1" style="padding-left: 8pt;text-indent: 0pt;text-align: left;">${data.postnaStevilka}, CITY, ${data.drzava}</p>
-        <p class="s1" style="padding-left: 8pt;text-indent: 0pt;text-align: left;">${data.davcna}</p>
+        <p class="s1" style="padding-left: 8pt;text-indent: 0pt;text-align: left;">${data.postnaSt}, ${data.mesto}, ${data.drzava}</p>
+        <p class="s1" style="padding-left: 8pt;text-indent: 0pt;text-align: left;">${data.davcnaSt}</p>
     
         <br /><br /><br />
-    
-        <h1 style="padding-top: 3pt;padding-left: 320pt;text-indent: 0pt;text-align: left;">INVOICE# ${data.stevilkaRacuna}</h1>
-        <p style="padding-top: 1pt;padding-left: 320pt;text-indent: 0pt;text-align: left;">Place: PLACE</p>
-        <p style="padding-top: 1pt;padding-left: 320pt;text-indent: 0pt;text-align: left;">Ref. #: US00 ${data.stevilkaRacuna}</p>
-        <p style="padding-top: 1pt;padding-left: 320pt;text-indent: 0pt;text-align: left;">Issued: ${getHumanReadableDate(new Date(data.datumIzdaje))}</p>
-        <p style="padding-top: 1pt;padding-left: 320pt;text-indent: 0pt;text-align: left;">Due date: ${getHumanReadableDate(new Date(data.rokPlacila))}</p>
-        <p style="padding-top: 1pt;padding-left: 320pt;text-indent: 0pt;text-align: left;">Service date: ${getHumanReadableDate(new Date(data.datumStoritve))}</p>
-    
+
+        <div style="width: 670px;">
+            <h1 style="padding-top: 3pt;padding-left: 320pt;text-indent: 0pt;text-align: left;">INVOICE# <span style="float: right;">${data.stRacuna}</span></h1>
+            <p style="padding-top: 1pt;padding-left: 320pt;text-indent: 0pt;text-align: left;">Place: <span style="float: right;">${data.mesto}</span></p>
+            <p style="padding-top: 1pt;padding-left: 320pt;text-indent: 0pt;text-align: left;">Ref. #: <span style="float: right;">US00 ${data.stRacuna}</span></p>
+            <p style="padding-top: 1pt;padding-left: 320pt;text-indent: 0pt;text-align: left;">Issued: <span style="float: right;">${getHumanReadableDate(new Date(data.datumIzdaje))}</span> </p>
+            <p style="padding-top: 1pt;padding-left: 320pt;text-indent: 0pt;text-align: left;">Due date: <span style="float: right;">${getHumanReadableDate(new Date(data.rokPlacila))}</span> </p>
+            <p style="padding-top: 1pt;padding-left: 320pt;text-indent: 0pt;text-align: left;">Service date: <span style="float: right;">${getHumanReadableDate(new Date(data.datumStoritve))}</span> </p>
+        </div>
         <br /><br />
     
         <p class="s1" style="padding-top: 2pt;padding-left: 8pt;text-indent: 0pt;text-align: left;">Remarks</p>
@@ -426,16 +422,16 @@ function changeHTMLTemplate(data) {
                         <p class="s2" style="padding-top: 1pt;padding-left: 2pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${data.storitve[i].name}, ${data.storitve[i].quantity}x</p>
                     </td>
                     <td style="width:51pt;">
-                        <p class="s2" style="padding-top: 1pt;padding-left: 15pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${Number(data.storitve[i].price) * Number(data.storitve[i].quantity)}</p>
+                        <p class="s2" style="padding-top: 1pt;padding-left: 15pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${(Number(data.storitve[i].price) * Number(data.storitve[i].quantity)).toFixed(2)}</p>
                     </td>
                     <td style="width:46pt;">
-                        <p class="s2" style="padding-top: 1pt;padding-left: 10pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${data.storitve[i].VAT}</p>
+                        <p class="s2" style="padding-top: 1pt;padding-left: 19pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${data.storitve[i].VAT}</p>
                     </td>
                     <td style="width:41pt;">
-                        <p class="s2" style="padding-top: 1pt;padding-left: 12pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${Number(data.storitve[i].VAT) * (Number(data.storitve[i].price) * Number(data.storitve[i].quantity)/100)}</p>
+                        <p class="s2" style="padding-top: 1pt;padding-left: 12pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${(Number(data.storitve[i].price) * Number(data.storitve[i].quantity) * (Number(data.storitve[i].VAT) / 100)).toFixed(2)}</p>
                     </td>
                     <td style="width:45pt;">
-                        <p class="s2" style="padding-top: 1pt;padding-left: 12pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${Number(data.storitve[i].VAT) / 100 * Number(data.storitve[i].price) * Number(data.storitve[i].quantity)}</p>
+                        <p class="s2" style="padding-top: 1pt;padding-left: 12pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${(Number(data.storitve[i].price) * Number(data.storitve[i].quantity) * (1 + Number(data.storitve[i].VAT) / 100)).toFixed(2)}</p>
                     </td>
                 </tr>`;
             }
@@ -448,22 +444,20 @@ function changeHTMLTemplate(data) {
             <tr style="height:13pt"><td colspan="6"><p class="s2" style="border-bottom: 2px solid black;"></p></td><tr>
             </table>
 
-            <h1 style="padding-left: 23pt;text-indent: 0pt;text-align: left;">TOTAL (EUR) ${data.znesek}</h1>
+            <h1 style="padding-left: 23pt;text-indent: 0pt;text-align: left;"><span>TOTAL (EUR)</span><span style="display: inline-block; width:500px;"></span>${data.znesek}</h1>            
 
             <br /><br /><br /><br />
 
-            <p class="s1" style="padding-left: 8pt;text-indent: 0pt;text-align: left;">CEO:</p>
+            <p class="s1" style="padding-left: 8pt;text-indent: 0pt;text-align: left;">Izdajatelj:</p>
 
-            <p class="s1" style="padding-left: 8pt;text-indent: 0pt;text-align: left;">${data.drzava}</p>
+            <p class="s1" style="padding-left: 8pt;text-indent: 0pt;text-align: left;">${data.vpisal}</p>
 
 
             <br /><br /><br /><br /><br /><br />
 
-            <p style="text-indent: 0pt;text-align: left;">
-                <span>
-                    <img width="690" height="85" alt="image" src="Image_003.png" />
-                </span>
-            </p>
+            <div>
+                <img width="690" height="117" alt="image" src="Image_003.png" />
+            </div>
         </body>
 
         </html>`;

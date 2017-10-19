@@ -8,8 +8,8 @@ export class ApiCallsService {
 
   constructor(private http: Http) { }
 
-  billsApiAddress = "http://localhost:12534/bills";
-  pdfApiAddress = "http://localhost:12534/pdfs"
+  billsApiAddress = "/bills";
+  pdfApiAddress = "/pdfs"
 
   // iz https://codecraft.tv/courses/angular/http/http-with-observables/
   // v komponento vrne 'Observable', pazi da je importana!
@@ -23,10 +23,12 @@ export class ApiCallsService {
   }
 
   postBill(data): Observable<any> {
+    console.log("postBill");
     return this.http.post(this.billsApiAddress, JSON.stringify(data), this.prepareJsonHeader()).map(res => res.json());
   }
 
   putBill(id, data) {
+    console.log("putBill");
     return this.http.put(this.billsApiAddress + "/" + id, data, this.prepareJsonHeader()).map(res => res.json());
       // .subscribe((res) => {
       //   console.log(res.json());

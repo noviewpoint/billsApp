@@ -20,6 +20,10 @@ input[type=text] {
 
 }
 
+div.btn-group-justified {
+	width: 100%;
+}
+
 /* http://cssload.net/ */
 #fountainG{
 	position:relative;

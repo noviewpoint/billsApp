@@ -2,9 +2,9 @@
 
   <legend>Seznam računov</legend>
 
-  <button class="btn btn-primary btn-lg btn-block" [routerLink] = "['/nov']">Izdaj nov račun</button>
+  <button class="btn btn-primary btn-lg btn-block" [routerLink] = "['/racun']">Izdaj nov račun</button>
   
-  <input [(ngModel)]="searchText" class="form-control" type="search" placeholder="Išči med računi">
+  <input [(ngModel)]="searchText" class="form-control" type="search" placeholder="Išči med računi (po stranki, znesku ali izdajatelju)">
   
   <table class="table table-striped table-hover">
     <thead>
@@ -12,19 +12,19 @@
         <th>Stranka</th>
         <th>Znesek</th>
         <th>Datum</th>
-        <th>Izdal</th>
+        <th>Vpisal</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let e of bills | async | iskanje: {stranka: searchText, znesek: searchText, drzava: searchText} : false; let i = index;">
+      <tr *ngFor="let e of bills | async | iskanje: {stranka: searchText, znesek: searchText, vpisal: searchText} : false; let i = index;">
         <td>{{e.stranka}}</td>
         <td>{{e.znesek | currency: "EUR": true}}</td>
         <td>{{e.datumIzdaje | date: "dd-MM-yyyy"}}</td>
-        <td>{{e.drzava}}</td>
+        <td>{{e.vpisal}}</td>
         <td><button class="btn btn-sm btn-info" (click) = "print(e._id);">Natisni</button></td>
-        <td><button class="btn btn-sm btn-success" (click) = "toPdf(e._id);">PDF</button></td>
-        <td><button class="btn btn-sm btn-warning" (click) = "edit(e._id, e);">Spremeni</button></td>
-        <td><button class="btn btn-sm btn-danger" (click) = "remove(e._id, content);">Odstrani</button></td>
+        <td><button class="btn btn-sm btn-success" (click) = "toPdf(e._id);">Odpri PDF</button></td>
+        <td><button class="btn btn-sm btn-warning" (click) = "edit(e);">Spremeni</button></td>
+        <td><button class="btn btn-sm btn-danger" (click) = "remove(content, e._id);">Odstrani</button></td>
       </tr>
     </tbody>
   </table>
@@ -42,7 +42,17 @@
     <p>Ali ste prepričani</p>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="c('OK')">OK</button>
-    <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">Prekliči</button>
+    <div class="btn-group-justified">
+      <div class="row">
+
+        <div class="col-sm-6">
+          <button type="button" class="btn btn-danger btn-block" (click)="c('OK')">OK</button>
+        </div>
+
+        <div class="col-sm-6">
+          <button type="button" class="btn btn-success btn-block" (click)="c('Close click')">Prekliči</button>
+        </div>
+      </div>
+    </div>
   </div>
 </ng-template>

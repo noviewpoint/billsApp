@@ -3,6 +3,8 @@ import { ApiCallsService } from '../api-calls.service';
 import { Observable } from 'rxjs';
 import { IskanjePipe } from '../iskanje.pipe';
 import { NgbModule, NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
+import { Router } from '@angular/router';
+import { SharedPodatkiService } from '../shared-podatki.service';
 
 @Component({
   selector: 'app-seznam-racunov',
@@ -11,15 +13,20 @@ import { NgbModule, NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-boots
 })
 export class SeznamRacunovComponent implements OnInit {
 
-  constructor(private service: ApiCallsService, private modalService: NgbModal) { }
+  constructor(private service: ApiCallsService, private modalService: NgbModal, private router: Router, private shared: SharedPodatkiService) { }
 
   bills: Observable<any>;
   searchText;
 
-  openModal(content) {
+  openModal(content, execute, id) {
     console.log("Opened Modal!");
     this.modalService.open(content).result.then((result) => {
       console.log(`Closed with: ${result}`);
+      if (result === "OK") {
+        execute(id).subscribe(res => {
+          this.refreshData();
+        });  
+      }
     }, (reason) => {
       console.log(`Dismissed ${this.getDismissReason(reason)}`);
     });
@@ -36,8 +43,10 @@ export class SeznamRacunovComponent implements OnInit {
   }
 
   ngOnInit() {
+    console.log("V /seznam");
     document.body.style.background = '#FEFEFA'; // Baby Powder
     this.refreshData();
+    this.shared.resetirajRacun();
   }
 
   refreshData() {
@@ -46,43 +55,23 @@ export class SeznamRacunovComponent implements OnInit {
 
   print = function(id) {
     console.log(id);
-
-    this.service.getBill(id).subscribe(res => {
-      alert(res);
-    });
-
-    // window.print();
   }
 
   toPdf = function(id) {
-    console.log(id);
-
     this.service.getPdf(id).subscribe(res => {
-      const blob = new Blob([res], {type: 'application/pdf'});
-      const url = window.URL.createObjectURL(blob);
-      window.open("http://localhost:12534/pdfs/" + id);
+      // const blob = new Blob([res], {type: 'application/pdf'});
+      // const url = window.URL.createObjectURL(blob);
+      window.open("/pdfs/" + id);
     });
   }
   
-  edit = function(id, data) {
-    console.log(id, data);
-
-    // this.service.putBill(id, data).subscribe(res => {
-    //   console.log(res);
-    //   this.refreshData();
-    // });
-    alert("Nov route: /change ?");
+  edit = function(data) {
+    this.shared.trenutniRacun = data;
+    this.router.navigate(["/racun"], {queryParams: {"st": data.stRacuna }}); // uporabniku prijazen link?
   }
 
-  remove = function(id, modalContent) {
-    console.log(id);
-
-    this.openModal(modalContent);
-
-    // this.service.deleteBill(id).subscribe(res => {
-    //   console.log(res);
-    //   this.refreshData();
-    // });    
+  remove = function(modalContent, id) {
+    this.openModal(modalContent, this.service.deleteBill.bind(this.service), id);
   }
 
 }

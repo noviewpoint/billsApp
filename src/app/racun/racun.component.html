@@ -1,7 +1,7 @@
 <!-- MODEL DRIVEN FORM -->
 <form [formGroup] = "obrazec" (ngSubmit) = "submitBill(obrazec.value, content);">
 
-  <h1>Vnos računa</h1>
+  <h1>{{naslovTekst}}</h1>
 
   <legend>Podatki o stranki</legend>
 
@@ -16,7 +16,7 @@
     <!-- DAVCNA STEVILKA -->
     <label for="_davcna" class="col-sm-2 col-form-label">Davčna številka</label>
     <div class="col-sm-4">
-      <input type="text" name="_davcna" placeholder="Davčna števika" formControlName="davcna" class="form-control" id="_davcna">
+      <input type="text" name="_davcna" placeholder="Davčna števika" formControlName="davcnaSt" class="form-control" id="_davcna">
     </div>
 
   </div>
@@ -29,20 +29,26 @@
       <input type="text" name="_naslov" placeholder="Naslov" formControlName="naslov" class="form-control" id="_naslov">
     </div>
 
-    <!-- POSTNA STEVILKA -->
-    <label for="_postnaStevilka" class="col-sm-2 col-form-label">Poštna številka</label>
+    <!-- DRZAVA -->
+    <label for="_drzava" class="col-sm-2 col-form-label">Država</label>
     <div class="col-sm-4">
-      <input type="text" name="_postnaStevilka" placeholder="Poštna številka" formControlName="postnaStevilka" class="form-control" id="_postnaStevilka">
+      <input type="text" name="_drzava" placeholder="Država" formControlName="drzava" class="form-control" id="_drzava">
     </div>
 
   </div>
 
   <div class="form-group row">
 
-    <!-- DRZAVA -->
-    <label for="_drzava" class="col-sm-2 col-form-label">Država</label>
+    <!-- MESTO -->
+    <label for="_mesto" class="col-sm-2 col-form-label">Mesto</label>
     <div class="col-sm-4">
-      <input type="text" name="_drzava" placeholder="Država" formControlName="drzava" class="form-control" id="_drzava">
+      <input type="text" name="_mesto" placeholder="Mesto" formControlName="mesto" class="form-control" id="_mesto">
+    </div>
+
+    <!-- POSTNA STEVILKA -->
+    <label for="_postnaSt" class="col-sm-2 col-form-label">Poštna številka</label>
+    <div class="col-sm-4">
+      <input type="text" name="_postnaSt" placeholder="Poštna številka" formControlName="postnaSt" class="form-control" id="_postnaSt">
     </div>
 
 
@@ -75,9 +81,9 @@
     </div>
 
     <!-- STEVILKA RACUNA -->
-    <label for="_stevilkaRacuna" class="col-sm-2 col-form-label">Številka računa</label>
+    <label for="_stRacuna" class="col-sm-2 col-form-label">Številka računa</label>
     <div class="col-sm-4">
-      <input readonly type="text" name="_stevilkaRacuna" placeholder="Številka računa" formControlName="stevilkaRacuna" class="form-control" id="_stevilkaRacuna">
+      <input readonly type="text" name="_stRacuna" placeholder="Številka računa" formControlName="stRacuna" class="form-control" id="_stRacuna">
     </div>
 
   </div>
@@ -138,12 +144,12 @@
     <div class="row">
 
       <div class="col-sm-6">
-        <button type="submit" value="submit" [disabled] = "!obrazec.valid" class="btn btn-primary btn-block">Izdaj</button>
+        <button type="submit" value="submit" [disabled] = "!obrazec.valid" class="btn btn-primary btn-block">{{okGumbTekst}}</button>
       </div>
 
       <div class="col-sm-6">
         <!-- ob kliku nazaj node server dobi request, zakaj? -->
-        <button id="nazajButton" class="btn btn-success btn-block" [routerLink] = "['/seznam']">&#X25C0; Nazaj na seznam</button>
+        <button class="btn btn-success btn-block" [routerLink] = "['/seznam']">&#X25C0; Nazaj na seznam</button>
       </div>
 
     </div>
@@ -173,6 +179,17 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">OK</button>
+    <div class="btn-group-justified">
+        <div class="row">
+    
+          <div class="col-sm-6">
+            <button type="button" class="btn btn-primary btn-block" (click)="c('OK')">Vnesi nov račun</button>
+          </div>
+    
+          <div class="col-sm-6">
+            <button type="button" class="btn btn-success btn-block" (click)="c('Close click')">&#X25C0; Nazaj na seznam</button>
+          </div>
+        </div>
+      </div>
   </div>
 </ng-template>

@@ -10,11 +10,12 @@
 (predpogoj NodeJS, MongoDB, Git)
 
 1. Kloniranje repozitorija: git clone https://github.com/noviewpoint/billsApp
-2. Instalacija Angular CLIja: npm install -g @angular/cli
-3. (generiranje MongoDB baze)
-4. Install vseh paketov: npm install
-5. Buildanje aplikacije: ng build
-6. Strezba aplikacija: node server
+2. Pomik v pravo mapo: cd billsApp
+3. (Globalna) instalacija Angular CLIja: npm install -g @angular/cli
+4. MongoDB proces mora teci! Aplikacija predpostavlja default port 27017.
+5. Install vseh paketov (dependencyjev): npm install
+6. Buildanje aplikacije: ng build
+7. Strezba aplikacija: node server
 
 Aplikacija na voljo na 'localhost:12534'
 

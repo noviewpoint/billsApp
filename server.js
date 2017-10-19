@@ -5,14 +5,10 @@ const http = require("http");
 const colors = require("colors");
 const cors = require("cors");
 const fs = require("fs");
-
-// const PDFDocument = require("pdfkit");
-// const pdf2json = require("pdf2json");
-// const json2pdf = require("pdf2json");
 const pdf = require("html-pdf");
 
 const mongojs = require("mongojs");
-const db = mongojs('lulu:lulu@localhost:16666/appContacts', ['bills']); // se poveze v MongoDB
+const db = mongojs('localhost:27017/kalmia'); // se poveze v MongoDB
 const portHttpServer = 12534;
 
 let app = null; // const?
@@ -172,7 +168,7 @@ function sendPdfFromDiskPrint(response, data) {
                 console.log("Success");
             }
         });
-        
+
     });
 }
 

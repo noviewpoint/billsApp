@@ -1,3 +1,3 @@
-Pisanje navodil
+Popravki
 
-etc
+Dopolnil navodila, odstranil nerabljene pakete

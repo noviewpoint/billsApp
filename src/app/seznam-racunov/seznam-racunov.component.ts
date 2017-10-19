@@ -57,8 +57,10 @@ export class SeznamRacunovComponent implements OnInit {
   toPdf = function(id) {
     console.log(id);
 
-    this.service.getBill(id).subscribe(res => {
-      alert(res);
+    this.service.getPdf(id).subscribe(res => {
+      const blob = new Blob([res], {type: 'application/pdf'});
+      const url = window.URL.createObjectURL(blob);
+      window.open("http://localhost:12534/pdfs/" + id);
     });
   }
   

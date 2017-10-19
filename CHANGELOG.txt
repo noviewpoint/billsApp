@@ -1,9 +1,4 @@
-Dodal modal okna in izboljsal validacijo
+Dodal generiranje PDFja iz HTML templata
 
-Dodal pipe za search box. Dodal search box na '/seznam'.
-
-Dodal modal okno za izdajo racuna na '/nov'. Dodal modal okno za
-brisanje racuna na '/seznam'.
-
-Izboljsal validacijo forma za nov racun (regexi za preverjanje
-stevil). Dodal loading animacijo v css na modal okno na '/nov'.
+HTML template je en ogromen string v server.js, v katerega vstavljam
+vrednosti iz baze.

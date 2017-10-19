@@ -9,6 +9,7 @@ export class ApiCallsService {
   constructor(private http: Http) { }
 
   billsApiAddress = "http://localhost:12534/bills";
+  pdfApiAddress = "http://localhost:12534/pdfs"
 
   // iz https://codecraft.tv/courses/angular/http/http-with-observables/
   // v komponento vrne 'Observable', pazi da je importana!
@@ -39,9 +40,29 @@ export class ApiCallsService {
       // });
   }
 
+  getPdf(id): Observable<any> {
+
+    if (id === undefined) {
+      id = "";
+    }
+
+    return this.http.get(this.pdfApiAddress + "/" + id, this.preparePdfHeader()).map(res => res.arrayBuffer);
+  }
+
   prepareJsonHeader() {
     var header = new Headers();
     header.append('Content-Type', 'application/json; charset=utf-8');
+
+    var myRequestOptions = new RequestOptions({
+      headers: header
+    });
+    myRequestOptions.headers = header;
+    return myRequestOptions;
+  }
+
+  preparePdfHeader() {
+    var header = new Headers();
+    header.append('Content-Type', 'application/pdf; charset=utf-8');
 
     var myRequestOptions = new RequestOptions({
       headers: header

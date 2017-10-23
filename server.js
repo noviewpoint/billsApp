@@ -1,27 +1,49 @@
-const express = require("express");
+const express    = require("express");
 const bodyParser = require("body-parser");
-const path = require("path");
-const http = require("http");
-const colors = require("colors");
-const cors = require("cors");
-const fs = require("fs");
-const pdf = require("html-pdf");
+const path       = require("path");
+const colors     = require("colors");
+const cors       = require("cors");
+const fs         = require("fs");
+const pdf        = require("html-pdf");
+const mongodb    = require("mongodb");
+const assert     = require("assert"); // za testiranje kode (namesto preverjanja napak z if-om)
 
-const mongojs = require("mongojs");
-const db = mongojs('localhost:27017/kalmia'); // se poveze v MongoDB
-const portHttpServer = 12534;
+const portHttpServer     = 12534;
+const MongoClient        = mongodb.MongoClient;
+const ObjectId           = mongodb.ObjectID;
+const dbConnectionString = "mongodb://lulu:lulu@localhost:16666/appContacts";
 
-let app = null; // const?
-let httpServer = null; // const?
+var app        = null;
+var httpServer = null;
+var db         = null;
 
-initHttpWebsocketServer();
+
+
+initHttpServer();
+initMongoDatabaseConnection();
+
+
+
+/* --------------------- MONGO BAZA ---------------------- */
+function initMongoDatabaseConnection() {
+    MongoClient.connect(dbConnectionString, function(err, database) {
+        assert.equal(null, err);
+        console.log("Connected correctly to the database.");
+        db = database;
+    }); 
+}
+
+
 
 /* -------------------- HTTP STREZNIK -------------------- */
-function initHttpWebsocketServer() {
+function initHttpServer() {
     app = express();
-    // app.use(bodyParser.urlencoded({extended: true}));
     app.use(cors()); // preden nastavis port!
+
+    /* baje lahko uporablja oboje */
+    app.use(bodyParser.urlencoded({extended: true}));
     app.use(bodyParser.json());
+
 	app.set("port", portHttpServer);
 	app.use(express.static(path.join(__dirname, "dist"))); // najdi angular aplikacijo v mapi dist, zgenerirani ob 'ng build'
     httpServer = app.listen(app.get("port"), "0.0.0.0", logHttpServer); // 0.0.0.0 -> poslusaj na vseh interface-ih (za hosting na public IP-ju)
@@ -36,141 +58,180 @@ function setRoutes() {
     app.post("/bills", postBill);
     app.put("/bills/:id", putBill);
     app.delete("/bills/:id", deleteBill);
-    app.get("/pdfs-dl/:id", getPdfDownload);
-    app.get("/pdfs-print/:id", getPdfPrint);
+    
+    app.get("/pdfs-dl/:id", getPdfForDownload);
+    app.get("/pdfs-print/:id", getPdfForPrint);
+
+    app.get("/clients/:client", getClients);
 }
 
+
+
+/* ----------------------- ROUTES ------------------------ */
 function getBills(request, response) {
-    console.log("GET request");
-    db.bills.find().sort({znesek: 1}, (err, docs) => {
-        console.log(docs);
-        response.json(docs);
-        logMongoSelect();
+    // console.log("GET request getBills");
+    findBillsQuery().then(x => {
+        logMongoFind();
+        response.json(x);
     });
 }
-
 function getBill(request, response) {
-    console.log("GET request");
-    var id = request.params.id;
-    db.bills.findOne({
-        _id: mongojs.ObjectId(id)
-    }, (err, doc) => {
-        response.json(doc);
-        logMongoSelect();
+    // console.log("GET request getBill");
+    findOneBillQuery(request.params.id).then(x => {
+        logMongoFindOne();
+        response.json(x);
     });
 }
-
 function postBill(request, response) {
-    console.log("POST request");
-    db.bills.insert(request.body, (err, doc) => {
-        response.json(doc);
-        logMongoInsert();
+    // console.log("POST request postBill");
+    insertOneBillQuery(request.body).then(x => {
+        logMongoInsertOne();
+        response.json(x);
     });
 }
-
 function putBill(request, response) {
-    console.log("PUT request");
-    var id = request.params.id;
-
-    console.log(request.body, id);
-    var celObjekt = request.body;
-
-    db.bills.findOne({
-        _id: mongojs.ObjectId(id)
-    }, (err, doc) => {
-        db.bills.update(doc, celObjekt, (err, doc) => {
-            response.json(doc);
-            logMongoUpdate();
-        });
+    // console.log("PUT request putBill");
+    updateOneBillQuery(request.params.id, request.body).then(x => {
+        logMongoUpdateOne();
+        response.json(x);
     });
 }
-
 function deleteBill(request, response) {
-    console.log("DELETE request");
-    var id = request.params.id;
-    db.bills.remove({
-        _id: mongojs.ObjectId(id)
-    }, (err, doc) => {
-        response.json(doc);
-        logMongoDelete();
+    // console.log("DELETE request deleteBill");
+    deleteOneBillQuery(request.params.id).then(x => {
+        logMongoDeleteOne();
+        response.json(x);
     });
 }
 
-function getPdfDownload(request, response) {
-    console.log("GET request");
-    var id = request.params.id;
-
-    if (!id) {
-        throw "No element specified through url";
-        return;
+function getPdfForDownload(request, response) {
+    // console.log("GET request getPdfForDownload");
+    if (!request.params.id) {
+        throw "No element specified!";
     }
-
-    db.bills.findOne({
-        _id: mongojs.ObjectId(id)
-    }, (err, doc) => {
-        console.log(doc);
-        sendPdfFromDiskDownload(response, doc);
+    findOneBillQuery(request.params.id).then(x => {
+        generatePdf(x).then(x => {
+            fs.readFile("./server/temp.pdf", (err, data) => { // odpre v browserju
+                assert.equal(err, null);
+                response.contentType("application/pdf");
+                response.send(data);
+            });
+        });
     });
 }
-
-function getPdfPrint(request, response) {
-    console.log("GET request");
-    var id = request.params.id;
-
-    if (!id) {
-        throw "No element specified through url";
-        return;
+function getPdfForPrint(request, response) {
+    // console.log("GET request getPdfForPrint");
+    if (!request.params.id) {
+        throw "No element specified!";
     }
-
-    db.bills.findOne({
-        _id: mongojs.ObjectId(id)
-    }, (err, doc) => {
-        console.log(doc);
-        sendPdfFromDiskPrint(response, doc);
-    });
-}
-
-function sendPdfFromDiskDownload(response, data) {
-    var file = path.join(__dirname, "./server/Racun.html");
-    var html = changeHTMLTemplate(data);
-    var base = "file://" + __dirname + "/server/";
-    var options = { format: 'A4', base: base  }; // file:///C:/Users/david/Desktop/kalmia/newWay/billsApp/server/
-
-    pdf.create(html, options).toFile('./server/temp.pdf', function(err, res) {
-        if (err) return console.log(err);
-
-        response.contentType("application/pdf");
-        
-        fs.readFile('./server/temp.pdf', function (err, data){ // odpre v browserju
-            if (err) return console.log(err);
+    findOneBillQuery(request.params.id).then(x => {
+        generatePdf(x).then(x => {
             response.contentType("application/pdf");
-            response.send(data);
+            response.download("./server/temp.pdf", err => { // downloada v broserju
+                assert.equal(err, null);
+            });
         });
     });
 }
 
-function sendPdfFromDiskPrint(response, data) {
+function getClients(request, response) {
+    // console.log("GET request getClients");
+    findClientsQuery(request.params.client).then(x => {
+        logMongoFind();
+        response.json(x);
+    });
+}
+
+
+
+/* --------------------- DB QUERIES ---------------------- */
+function findBillsQuery() {
+    var query = {};
+    return new Promise((resolve, reject) => {
+        var cursor = db.collection("bills").find(query);
+        cursor.toArray((err, result) => {
+            assert.equal(err, null);
+            result.sort((a, b) => {
+                if (a.znesek - b.znesek !== 0) { // sortiraj po stevilih
+                    return a.znesek - b.znesek;
+                }
+                if (a.stranka > b.stranka) { // sortiraj po abecedi
+                    return 1;
+                } else if (a.stranka < b.stranka) {
+                    return -1;
+                }
+                return 0;
+            });
+            resolve(result);
+        });
+    });
+}
+function findOneBillQuery(id) {
+    var query = {"_id": ObjectId(id)};
+    return new Promise((resolve, reject) => {
+        db.collection("bills").findOne(query, (err, result) => {
+            assert.equal(err, null);
+            resolve(result);
+        });
+    });
+}
+function insertOneBillQuery(someData) { // argument is data in an object
+    return new Promise((resolve, reject) => {
+        db.collection("bills").insertOne(someData, (err, result) => {
+            assert.equal(err, null);
+            resolve(result);
+        });
+    });
+}
+function updateOneBillQuery(id, updatedData) {
+    var query = {"_id": ObjectId(id)}; // find the object you want to update via _id
+    return new Promise((resolve, reject) => {
+        db.collection("bills").updateOne(query, updatedData, (err, result) => { // updates all but _id field
+            assert.equal(err, null);
+            resolve(result);
+        });
+    });
+}
+function deleteOneBillQuery(id) {
+    var query = {"_id": ObjectId(id)};
+    return new Promise((resolve, reject) => {
+        db.collection("bills").deleteOne(query, (err, result) => {
+            assert.equal(err, null);
+            resolve(result);
+        });
+    });
+}
+
+function findClientsQuery(clientName) {
+    var query = {"stranka": {$regex: "^" + clientName}};
+    var sort = {"stranka": 1, "drzava": 1};
+    return new Promise((resolve, reject) => {
+        var cursor = db.collection("bills").find(query).sort(sort);
+        cursor.toArray((err, result) => {
+            assert.equal(err, null);
+            resolve(result);
+        });
+    });
+}
+
+
+
+/* ------------------------ PDF -------------------------- */
+function generatePdf(data) {
     var file = path.join(__dirname, "./server/Racun.html");
     var html = changeHTMLTemplate(data);
     var base = "file://" + __dirname + "/server/";
     var options = { format: 'A4', base: base  }; // file:///C:/Users/david/Desktop/kalmia/newWay/billsApp/server/
 
-    pdf.create(html, options).toFile('./server/temp.pdf', function(err, res) {
-        if (err) return console.log(err);
-
-        response.contentType("application/pdf");
-
-        response.download('./server/temp.pdf', function (err) { // downloada v broserju
-            if (err) {
-                console.log("Error");
-                console.log(err);
-            } else {
-                console.log("Success");
-            }
+    return new Promise((resolve, reject) => {
+        pdf.create(html, options).toFile('./server/temp.pdf', (err, result) => {
+            assert.equal(err, null);
+            resolve(result);
         });
-
     });
 }
+
+
 
 /* -------------------- LOG FUNCTIONS -------------------- */
 function logHttpServer() {
@@ -183,17 +244,20 @@ function httpConnection(request) {
 function httpError(error) {
 	console.log("Napaka HTTP serverja: %s".red, error.message);
 }
-function logMongoSelect() {
+function logMongoFind() {
     console.log(".find v Mongo uspesen".cyan);
 }
-function logMongoInsert() {
-    console.log(".insert v Mongo uspesen".cyan);
+function logMongoFindOne() {
+    console.log(".findOne v Mongo uspesen".cyan);
 }
-function logMongoUpdate() {
-    console.log(".findAndModify v Mongo uspesen".cyan);
+function logMongoInsertOne() {
+    console.log(".insertOne v Mongo uspesen".green);
 }
-function logMongoDelete() {
-    console.log(".remove v Mongo uspesen".cyan);
+function logMongoUpdateOne() {
+    console.log(".updateOne v Mongo uspesen".green);
+}
+function logMongoDeleteOne() {
+    console.log(".deleteOne v Mongo uspesen".red);
 }
 
 
@@ -204,7 +268,8 @@ function getHumanReadableDate(x) {
 
 function changeHTMLTemplate(data) {
 
-    var html = `<!DOCTYPE  html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    var html = `
+    <!DOCTYPE  html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml">
     
     <head>
@@ -339,34 +404,35 @@ function changeHTMLTemplate(data) {
                 </td>
             </tr>
     
-            <tr style="height:13pt"></tr>`;
+            <tr style="height:13pt"></tr>
+    `;
 
-
-            for (let i = 0, length = data.storitve.length; i < length; i++) {
-                html += `<tr style="height:13pt;">
-                    <td style="width:15pt;">
-                        <p class="s2" style="padding-top: 1pt;padding-left: 4pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${i + 1}</p>
-                    </td>
-                    <td style="width:297pt;">
-                        <p class="s2" style="padding-top: 1pt;padding-left: 2pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${data.storitve[i].name}, ${data.storitve[i].quantity}x</p>
-                    </td>
-                    <td style="width:51pt;">
-                        <p class="s2" style="padding-top: 1pt;padding-left: 15pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${(Number(data.storitve[i].price) * Number(data.storitve[i].quantity)).toFixed(2)}</p>
-                    </td>
-                    <td style="width:46pt;">
-                        <p class="s2" style="padding-top: 1pt;padding-left: 19pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${data.storitve[i].VAT}</p>
-                    </td>
-                    <td style="width:41pt;">
-                        <p class="s2" style="padding-top: 1pt;padding-left: 12pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${(Number(data.storitve[i].price) * Number(data.storitve[i].quantity) * (Number(data.storitve[i].VAT) / 100)).toFixed(2)}</p>
-                    </td>
-                    <td style="width:45pt;">
-                        <p class="s2" style="padding-top: 1pt;padding-left: 12pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${(Number(data.storitve[i].price) * Number(data.storitve[i].quantity) * (1 + Number(data.storitve[i].VAT) / 100)).toFixed(2)}</p>
-                    </td>
-                </tr>`;
-            }
+    for (let i = 0, length = data.storitve.length; i < length; i++) {
+        html += `
+            <tr style="height:13pt;">
+                <td style="width:15pt;">
+                    <p class="s2" style="padding-top: 1pt;padding-left: 4pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${i + 1}</p>
+                </td>
+                <td style="width:297pt;">
+                    <p class="s2" style="padding-top: 1pt;padding-left: 2pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${data.storitve[i].name}, ${data.storitve[i].quantity}x</p>
+                </td>
+                <td style="width:51pt;">
+                    <p class="s2" style="padding-top: 1pt;padding-left: 15pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${(Number(data.storitve[i].price) * Number(data.storitve[i].quantity)).toFixed(2)}</p>
+                </td>
+                <td style="width:46pt;">
+                    <p class="s2" style="padding-top: 1pt;padding-left: 19pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${data.storitve[i].VAT}</p>
+                </td>
+                <td style="width:41pt;">
+                    <p class="s2" style="padding-top: 1pt;padding-left: 12pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${(Number(data.storitve[i].price) * Number(data.storitve[i].quantity) * (Number(data.storitve[i].VAT) / 100)).toFixed(2)}</p>
+                </td>
+                <td style="width:45pt;">
+                    <p class="s2" style="padding-top: 1pt;padding-left: 12pt;text-indent: 0pt;line-height: 11pt;text-align: left;">${(Number(data.storitve[i].price) * Number(data.storitve[i].quantity) * (1 + Number(data.storitve[i].VAT) / 100)).toFixed(2)}</p>
+                </td>
+            </tr>
+        `;
+    }
     
-            html += `
-
+    html += `
             <tr style="height:13pt"></tr>
             <tr style="height:13pt"></tr>
 
@@ -387,9 +453,9 @@ function changeHTMLTemplate(data) {
             <div>
                 <img width="690" height="117" alt="image" src="Image_003.png" />
             </div>
-        </body>
-
-        </html>`;
+    </body>
+    </html>
+    `;
 
     return html;
 }

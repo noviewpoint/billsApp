@@ -1,3 +1,4 @@
-Popravki
+Dopolnitve v server.js
 
-Dopolnil navodila, odstranil nerabljene pakete
+Zamenjal modul mongojs z mongodb. Dodal sortiranje vrnjenih
+rezultatov.

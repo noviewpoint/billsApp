@@ -24,6 +24,10 @@ div.btn-group-justified {
 	width: 100%;
 }
 
+ngb-typeahead-window .dropdown-menu {
+	width: 100%;
+}
+
 /* http://cssload.net/ */
 #fountainG{
 	position:relative;

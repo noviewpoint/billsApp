@@ -203,7 +203,7 @@ function deleteOneBillQuery(id) {
 }
 
 function findClientsQuery(clientName) {
-    var query = {"stranka": {$regex: "^" + clientName}};
+    var query = {"stranka": {$regex: "^" + clientName, $options: "i"}}; // case insensitive match!
     var sort = {"stranka": 1, "drzava": 1};
     return new Promise((resolve, reject) => {
         var cursor = db.collection("bills").find(query).sort(sort);

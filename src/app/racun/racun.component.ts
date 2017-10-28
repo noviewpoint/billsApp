@@ -8,6 +8,17 @@ import { SharedPodatkiService } from '../shared-podatki.service';
 /* https://alligator.io/angular/query-parameters/ */
 import { ActivatedRoute } from '@angular/router';
 import 'rxjs/add/operator/filter';
+// import { NgStyle } from '@angular/common';
+
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/of';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/debounceTime';
+import 'rxjs/add/operator/distinctUntilChanged';
+import 'rxjs/add/operator/do';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/switchMap';
+import 'rxjs/add/operator/merge';
 
 @Component({
   selector: 'app-racun',
@@ -36,6 +47,31 @@ export class RacunComponent implements OnInit {
   modalAnimationFlag = false;
   editId: string;
 
+  searching = false;
+  searchFailed = false;
+  hideSearchingWhenUnsubscribed = new Observable(() => () => this.searching = false);
+
+  // inputFormatter = (x: {stranka: string}) => x.stranka;
+  // resultFormatter = (x: {stranka: string}) => x.stranka;
+
+  search = (text$: Observable<any>) =>
+    text$
+      .debounceTime(300)
+      .distinctUntilChanged()
+      .do((text) => {
+        console.log(text);
+        this.searching = true
+      })
+      .switchMap(term =>
+        this.service.getClients(term)
+          .do(() => this.searchFailed = false)
+          .catch(() => {
+            this.searchFailed = true;
+            return Observable.of([]);
+          }))
+      .do(() => this.searching = false)
+      .merge(this.hideSearchingWhenUnsubscribed);
+
   openModal(content) {
     console.log("Opened Modal!");
     this.modalService.open(content).result.then((result) => {
@@ -59,11 +95,11 @@ export class RacunComponent implements OnInit {
       return `with: ${reason}`;
     }
   }
-  
+
   ngOnInit() {
     console.log("ngOnInit()");
     document.body.style.background = '#F8F8FF'; // Ghost White
-    
+
     if(this.checkUrlParameters()) {
       this.editId = this.shared.trenutniRacun._id;
       this.naslovTekst = "Urejanje računa";

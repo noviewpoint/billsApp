@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
+import { JsonpModule } from '@angular/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { AppComponent } from './app.component';
@@ -12,6 +13,7 @@ import { ApiCallsService } from './api-calls.service';
 import { IskanjePipe } from './iskanje.pipe';
 import { AuthorizationService } from './authorization.service';
 import { SharedPodatkiService } from './shared-podatki.service';
+import * as $ from 'jquery';
 
 @NgModule({
   declarations: [
@@ -43,6 +45,7 @@ import { SharedPodatkiService } from './shared-podatki.service';
       useHash: true /* NUJNO! Brez tega '/#' ob menjavi routa requestas node server za page, ki ga ta nima! */
     }),
     BrowserAnimationsModule,
+    JsonpModule,
     NgbModule.forRoot()
   ],
   providers: [ApiCallsService, AuthorizationService, SharedPodatkiService],

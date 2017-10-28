@@ -10,8 +10,11 @@
     <!-- IME STRANKE -->
     <label for="_stranka" class="col-sm-2 col-form-label">Kupec</label>
     <div class="col-sm-4">
-      <input type="text" name="_stranka" placeholder="Ime stranke" formControlName="stranka" class="form-control" id="_stranka">
+      <input [class.is-invalid]="searchFailed" [ngbTypeahead]="search" [resultFormatter]="resultFormatter" [inputFormatter]="inputFormatter" type="text" name="_stranka" placeholder="Ime stranke" formControlName="stranka" class="form-control" id="_stranka">
     </div>
+
+    <span *ngIf="searching">searching...</span>
+    <div class="invalid-feedback" *ngIf="searchFailed">Sorry, suggestions could not be loaded.</div>
 
     <!-- DAVCNA STEVILKA -->
     <label for="_davcna" class="col-sm-2 col-form-label">Davčna številka</label>

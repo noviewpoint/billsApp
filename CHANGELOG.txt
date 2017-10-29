@@ -1,7 +1,8 @@
 Update
 
-Dodal jQuery. Importal JsonpModule, a ga ne uporabim (delam z http
-requesti). Dodal predlaganje rezultatov za vnos stranke s ti.
-typeahead (podobno select2):
+Dodal poste in postne stevilke v MongoDB. Dodal poizvedbe za njimi v spletno applikaciji.
 
-https://ng-bootstrap.github.io/#/components/typeahead/examples
+Probavam angular4 "Interface".
+
+Dodal launch.json za debuggiranje z Node.js prek Visual Studio Code:
+https://code.visualstudio.com/docs/editor/debugging

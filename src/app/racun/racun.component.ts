@@ -64,13 +64,64 @@ export class RacunComponent implements OnInit {
       })
       .switchMap(term =>
         this.service.getClients(term)
-          .do(() => this.searchFailed = false)
+          .do(() => {
+            setTimeout(function() {
+              $("ngb-typeahead-window.dropdown-menu").css("width", "100%");
+            }, 1);
+            this.searchFailed = false;
+          })
           .catch(() => {
             this.searchFailed = true;
             return Observable.of([]);
           }))
       .do(() => this.searching = false)
       .merge(this.hideSearchingWhenUnsubscribed);
+
+    searchPostalNames = (text$: Observable<any>) =>
+      text$
+        .debounceTime(300)
+        .distinctUntilChanged()
+        .do((text) => {
+          console.log(text);
+          this.searching = true
+        })
+        .switchMap(term =>
+          this.service.getPostalNames(term)
+            .do(() => {
+              setTimeout(function() {
+                $("ngb-typeahead-window.dropdown-menu").css("width", "100%");
+              }, 1);
+              this.searchFailed = false;
+            })
+            .catch(() => {
+              this.searchFailed = true;
+              return Observable.of([]);
+            }))
+        .do(() => this.searching = false)
+        .merge(this.hideSearchingWhenUnsubscribed);
+
+    searchPostalCodes = (text$: Observable<any>) =>
+      text$
+        .debounceTime(300)
+        .distinctUntilChanged()
+        .do((text) => {
+          console.log(text);
+          this.searching = true
+        })
+        .switchMap(term =>
+          this.service.getPostalCodes(term)
+            .do(() => {
+              setTimeout(function() {
+                $("ngb-typeahead-window.dropdown-menu").css("width", "100%");
+              }, 1);
+              this.searchFailed = false;
+            })
+            .catch(() => {
+              this.searchFailed = true;
+              return Observable.of([]);
+            }))
+        .do(() => this.searching = false)
+        .merge(this.hideSearchingWhenUnsubscribed);
 
   openModal(content) {
     console.log("Opened Modal!");

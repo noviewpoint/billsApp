@@ -53,11 +53,13 @@ export class SeznamRacunovComponent implements OnInit {
     this.bills = this.service.getBill();
   }
 
+  predpona: string = "http://localhost:12534/";
+
   toPdf = function(id) {
     this.service.printPdf(id).subscribe(res => {
       // const blob = new Blob([res], {type: 'application/pdf'});
       // const url = window.URL.createObjectURL(blob);
-      window.open("/pdfs-print/" + id);
+      window.open(this.predpona + "pdfs-print/" + id);
     });
   }
 
@@ -65,7 +67,7 @@ export class SeznamRacunovComponent implements OnInit {
     this.service.getPdf(id).subscribe(res => {
       // const blob = new Blob([res], {type: 'application/pdf'});
       // const url = window.URL.createObjectURL(blob);
-      window.open("/pdfs-dl/" + id);
+      window.open(this.predpona + "pdfs-dl/" + id);
     });
   }
   

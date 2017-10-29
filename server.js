@@ -1,17 +1,25 @@
-const express    = require("express");
-const bodyParser = require("body-parser");
-const path       = require("path");
-const colors     = require("colors");
-const cors       = require("cors");
-const fs         = require("fs");
-const pdf        = require("html-pdf");
-const mongodb    = require("mongodb");
-const assert     = require("assert"); // za testiranje kode (namesto preverjanja napak z if-om)
+const express      = require("express");
+const bodyParser   = require("body-parser");
+const path         = require("path");
+const colors       = require("colors");
+const cors         = require("cors");
+const fs           = require("fs");
+const pdf          = require("html-pdf");
+const mongodb      = require("mongodb");
+const assert       = require("assert"); // za testiranje kode (namesto preverjanja napak z if-om)
+const readline     = require("readline");
+const serverConfig = require("./server-config.js"); // mora biti s pikco!!! drugace defaultno isce NPM modul
 
-const portHttpServer     = 12534;
-const MongoClient        = mongodb.MongoClient;
-const ObjectId           = mongodb.ObjectID;
-const dbConnectionString = "mongodb://lulu:lulu@localhost:16666/appContacts";
+const {
+    portHttpServer,
+    dbConnectionString,
+    usersCollection,
+    postalCodesCollection,
+    billsCollection
+} = serverConfig;
+const MongoClient           = mongodb.MongoClient;
+const ObjectId              = mongodb.ObjectID;
+
 
 var app        = null;
 var httpServer = null;
@@ -21,7 +29,7 @@ var db         = null;
 
 initHttpServer();
 initMongoDatabaseConnection();
-
+// initListeningForKeyPress();
 
 
 /* --------------------- MONGO BAZA ---------------------- */
@@ -63,6 +71,50 @@ function setRoutes() {
     app.get("/pdfs-print/:id", getPdfForPrint);
 
     app.get("/clients/:client", getClients);
+    app.get("/postalCodes/:postalCode", getPostalCodes);
+    app.get("/postalNames/:postalName", getPostalNames);
+}
+
+
+
+/* ---------------------- KEYPRESS ----------------------- */
+function initListeningForKeyPress() {
+    readline.emitKeypressEvents(process.stdin);
+    process.stdin.setRawMode(true);
+    process.stdin.on("keypress", (str, key) => {
+      if (key.ctrl && key.name === "c") {
+        process.exit();
+      } else if (key.name === "w") {
+        // https://stackoverflow.com/questions/6456864/why-does-node-js-fs-readfile-return-a-buffer-instead-of-string
+        fs.readFile("./seznam_post.txt", "utf8", (err, data) => { // odpre v browserju
+            assert.equal(err, null);
+
+            // preoblikuj txt v array json objektov
+            let parsedData = data.split(/\r\n/);
+            parsedData.splice(-1, 1);
+            parsedData = parsedData.map(x => {
+                let delimiter = /\t/;
+                if (x.indexOf(delimiter) === -1) {
+                    delimiter = /\s{4}/;
+                }
+                let splitLine = x.split(delimiter);
+                let obj = {
+                    stevilka: splitLine[0],
+                    ime: splitLine[1]
+                };
+                return obj;
+            });
+            console.log(parsedData);
+            insertPostalCodesQuery(parsedData, postalCodesCollection);
+        });
+      } else {
+        console.log(`You pressed the "${str}" key`);
+        console.log();
+        console.log(key);
+        console.log();
+      }
+    });
+    console.log("Press any key...");
 }
 
 
@@ -142,27 +194,55 @@ function getClients(request, response) {
     });
 }
 
+function getPostalCodes(request, response) {
+    // console.log("GET request getPostalCodes");
+    findPostalCodesQuery(request.params.postalCode, postalCodesCollection).then(x => {
+        logMongoFind();
+        response.json(x);
+    });
+}
+
+function getPostalNames(request, response) {
+    // console.log("GET request getPostalNames");
+    findPostalNamesQuery(request.params.postalName, postalCodesCollection).then(x => {
+        logMongoFind();
+        response.json(x);
+    });
+}
 
 
 /* --------------------- DB QUERIES ---------------------- */
+function costumSort(input, numProp, textProp) {
+    if (input === undefined) {
+        return;
+    }
+    if (numProp === undefined) {
+        numProp = "znesek";
+    }
+    if (textProp === undefined) {
+        textProp = "stranka";
+    }
+
+    return input.sort((a, b) => {
+        if (a[numProp] - b[numProp] !== 0) { // sortiraj po stevilih
+            return a[numProp] - b[numProp];
+        }
+        if (a[textProp] > b[textProp]) { // sortiraj po abecedi
+            return 1;
+        } else if (a[textProp] < b[textProp]) {
+            return -1;
+        }
+        return 0;
+    });
+}
+
 function findBillsQuery() {
     var query = {};
     return new Promise((resolve, reject) => {
         var cursor = db.collection("bills").find(query);
         cursor.toArray((err, result) => {
             assert.equal(err, null);
-            result.sort((a, b) => {
-                if (a.znesek - b.znesek !== 0) { // sortiraj po stevilih
-                    return a.znesek - b.znesek;
-                }
-                if (a.stranka > b.stranka) { // sortiraj po abecedi
-                    return 1;
-                } else if (a.stranka < b.stranka) {
-                    return -1;
-                }
-                return 0;
-            });
-            resolve(result);
+            resolve(costumSort(result));
         });
     });
 }
@@ -179,6 +259,15 @@ function insertOneBillQuery(someData) { // argument is data in an object
     return new Promise((resolve, reject) => {
         db.collection("bills").insertOne(someData, (err, result) => {
             assert.equal(err, null);
+            resolve(result);
+        });
+    });
+}
+function insertPostalCodesQuery(someData, mongoCollection) { // argument is array of objects
+    return new Promise((resolve, reject) => {
+        db.collection(mongoCollection).insertMany(someData, (err, result) => {
+            assert.equal(err, null);
+            console.log("Number of documents inserted: " + result.insertedCount);
             resolve(result);
         });
     });
@@ -214,6 +303,26 @@ function findClientsQuery(clientName) {
     });
 }
 
+function findPostalCodesQuery(postalCode, mongoCollection) {
+    var query = {"stevilka": {$regex: "^" + postalCode}};
+    return new Promise((resolve, reject) => {
+        var cursor = db.collection(mongoCollection).find(query);
+        cursor.toArray((err, result) => {
+            assert.equal(err, null);
+            resolve(costumSort(result, "stevilka", "ime"));
+        });
+    });
+}
+function findPostalNamesQuery(postalName, mongoCollection) {
+    var query = {"ime": {$regex: "^" + postalName, $options: "i"}}; // case insensitive match!
+    return new Promise((resolve, reject) => {
+        var cursor = db.collection(mongoCollection).find(query);
+        cursor.toArray((err, result) => {
+            assert.equal(err, null);
+            resolve(costumSort(result, "stevilka", "ime"));
+        });
+    });
+}
 
 
 /* ------------------------ PDF -------------------------- */

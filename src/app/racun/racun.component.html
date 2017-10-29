@@ -45,13 +45,13 @@
     <!-- MESTO -->
     <label for="_mesto" class="col-sm-2 col-form-label">Mesto</label>
     <div class="col-sm-4">
-      <input type="text" name="_mesto" placeholder="Mesto" formControlName="mesto" class="form-control" id="_mesto">
+      <input [class.is-invalid]="searchFailed" [ngbTypeahead]="searchPostalNames" type="text" name="_mesto" placeholder="Mesto" formControlName="mesto" class="form-control" id="_mesto">
     </div>
 
     <!-- POSTNA STEVILKA -->
     <label for="_postnaSt" class="col-sm-2 col-form-label">Poštna številka</label>
     <div class="col-sm-4">
-      <input type="text" name="_postnaSt" placeholder="Poštna številka" formControlName="postnaSt" class="form-control" id="_postnaSt">
+      <input [class.is-invalid]="searchFailed" [ngbTypeahead]="searchPostalCodes" type="text" name="_postnaSt" placeholder="Poštna številka" formControlName="postnaSt" class="form-control" id="_postnaSt">
     </div>
 
 

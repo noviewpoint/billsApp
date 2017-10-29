@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Http, Headers, RequestOptions, Jsonp, URLSearchParams } from '@angular/http';
 import "rxjs/add/operator/map"; // da dela .map
 import { Observable } from 'rxjs';
+import { Bill } from './bill';
 
 @Injectable()
 export class ApiCallsService {
@@ -14,6 +15,8 @@ export class ApiCallsService {
   billsApiAddress: string = "http://localhost:12534/bills";
   pdfApiAddress: string = "http://localhost:12534/pdfs";
   clientsApiAdress: string = "http://localhost:12534/clients";
+  postalCodesApiAdress: string = "http://localhost:12534/postalCodes";
+  postalNamesApiAdress: string = "http://localhost:12534/postalNames";
 
   // iz https://codecraft.tv/courses/angular/http/http-with-observables/
   // v komponento vrne 'Observable', pazi da je importana!
@@ -23,7 +26,7 @@ export class ApiCallsService {
       id = "";
     }
 
-    return this.http.get(this.billsApiAddress + "/" + id, this.prepareJsonHeader()).map(res => res.json());
+    return this.http.get(this.billsApiAddress + "/" + id, this.prepareJsonHeader()).map(res => <Bill []>res.json());
   }
 
   getClients(term: string): Observable<any> {
@@ -32,10 +35,8 @@ export class ApiCallsService {
       return Observable.of([]);
     }
 
-    let wikiUrl = this.clientsApiAdress + "/" + term;
-
     return this.http
-      .get(wikiUrl, this.prepareJsonHeader())
+      .get(this.clientsApiAdress + "/" + term, this.prepareJsonHeader())
       .map(response => response.json())
       .map(x => {
         let temp = [];
@@ -50,9 +51,54 @@ export class ApiCallsService {
 
   }
 
+  getPostalNames(term: string): Observable<any> {
+    
+    if (term === "") {
+      return Observable.of([]);
+    }
+
+    return this.http
+      .get(this.postalNamesApiAdress + "/" + term, this.prepareJsonHeader())
+      .map(response => response.json())
+      .map(x => {
+        let temp = [];
+        for (let el of x.slice(0, 10)) { // omeji na max 10 rezultatov
+          if (el && el.hasOwnProperty("ime")) {
+            temp.push(el.ime);
+          }
+        }
+        console.log("In map:", temp);
+        return temp;
+      });
+
+  }
+
+  getPostalCodes(term: string): Observable<any> {
+    
+    if (term === "") {
+      return Observable.of([]);
+    }
+
+    return this.http
+      .get(this.postalCodesApiAdress + "/" + term, this.prepareJsonHeader())
+      .map(response => response.json())
+      .map(x => {
+        let temp = [];
+        for (let el of x.slice(0, 10)) { // omeji na max 10 rezultatov
+          if (el && el.hasOwnProperty("stevilka")) {
+            temp.push(el.stevilka);
+          }
+        }
+        console.log("In map:", temp);
+        return temp;
+      });
+
+  }
+  
+
   postBill(data): Observable<any> {
     console.log("postBill");
-    return this.http.post(this.billsApiAddress, JSON.stringify(data), this.prepareJsonHeader()).map(res => res.json());
+    return this.http.post(this.billsApiAddress, JSON.stringify(<Bill>data), this.prepareJsonHeader()).map(res => res.json());
   }
 
   putBill(id: string, data) {

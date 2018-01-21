@@ -8,6 +8,8 @@ const pdf          = require("html-pdf");
 const mongodb      = require("mongodb");
 const assert       = require("assert"); // za testiranje kode (namesto preverjanja napak z if-om)
 const readline     = require("readline");
+const jwt          = require("jsonwebtoken");
+const mongoose     = require("mongoose");
 const serverConfig = require("./server-config.js"); // mora biti s pikco!!! drugace defaultno isce NPM modul
 
 const {
@@ -21,15 +23,22 @@ const MongoClient           = mongodb.MongoClient;
 const ObjectId              = mongodb.ObjectID;
 
 
-var app        = null;
-var httpServer = null;
-var db         = null;
+var app          = null;
+const secureRoutes = express.Router();
+var httpServer   = null;
+var db           = null;
 
 
 
 initHttpServer();
 initMongoDatabaseConnection();
 // initListeningForKeyPress();
+
+
+
+/* ------------------------- JWT ------------------------- */
+process.env.SECRET_KEY = "mybadasskey"; // process is available all throughout the application
+
 
 
 /* --------------------- MONGO BAZA ---------------------- */
@@ -46,11 +55,14 @@ function initMongoDatabaseConnection() {
 /* -------------------- HTTP STREZNIK -------------------- */
 function initHttpServer() {
     app = express();
-    app.use(cors()); // preden nastavis port!
+    app.use(cors()); // MIDDLEWARE preden nastavis port!
 
     /* baje lahko uporablja oboje */
-    app.use(bodyParser.urlencoded({extended: true}));
-    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({extended: true})); // https://stackoverflow.com/questions/29960764/what-does-extended-mean-in-express-4-0
+    // extended is false, you can not post "nested object"; extended is true, post whatever you like
+    app.use(bodyParser.json()); // MIDDLEWARE
+
+    app.use("/secure-api", secureRoutes);
 
 	app.set("port", portHttpServer);
 	app.use(express.static(path.join(__dirname, "dist"))); // najdi angular aplikacijo v mapi dist, zgenerirani ob 'ng build'
@@ -58,9 +70,11 @@ function initHttpServer() {
 	httpServer.on("connection", httpConnection);
     httpServer.on("error", httpError);
     setRoutes();
+    setSecureRoutes();
 }
 
 function setRoutes() {
+    app.get("/authenticate", authenticate);
     app.get("/bills", getBills);
     app.get("/bills/:id", getBill);
     app.post("/bills", postBill);
@@ -73,6 +87,34 @@ function setRoutes() {
     app.get("/clients/:client", getClients);
     app.get("/postalCodes/:postalCode", getPostalCodes);
     app.get("/postalNames/:postalName", getPostalNames);
+
+    app.get("*", (request, response) => {
+        response.sendFile(path.join(__dirname, "dist/index.html")); // send all other requests to the Angular app (/# ?)
+    })
+}
+
+function setSecureRoutes() {
+    // Validation Middleware
+    secureRoutes.use(function(request, response, next) {
+        // user can pass the token in the body or the header
+        var token = request.body.token || request.headers["token"];
+        if (token) {
+            // response.send("You have a token. Congrats");
+            jwt.verify(token, process.env.SECRET_KEY, function(error, decode) {
+                if (error) {
+                    response.status(500).send("Error happened! Invalid token!");
+                } else {
+                    // response.status(200).send("U are validated #1");
+                    next();
+                }
+            });
+        } else {
+            response.send("Please send me the token");
+        }
+    });
+    secureRoutes.get("/get-data", function(request, response) {
+        response.status(200).send("U are validated #2");
+    });
 }
 
 
@@ -120,6 +162,19 @@ function initListeningForKeyPress() {
 
 
 /* ----------------------- ROUTES ------------------------ */
+function authenticate(request, response) {
+    var user = {
+        username: "test",
+        email: "test@test.com"
+    }
+    var token = jwt.sign(user, process.env.SECRET_KEY, {
+        expiresIn: 4000 // in seconds
+    });
+    response.json({
+        success: true,
+        token: token
+    })
+}
 function getBills(request, response) {
     // console.log("GET request getBills");
     findBillsQuery().then(x => {

@@ -43,3 +43,6 @@ Thumbs.db
 
 # moj server
 /server
+
+#ostalo
+package-lock.json

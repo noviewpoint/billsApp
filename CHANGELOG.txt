@@ -1,8 +1,3 @@
 Update
 
-Dodal poste in postne stevilke v MongoDB. Dodal poizvedbe za njimi v spletno applikaciji.
-
-Probavam angular4 "Interface".
-
-Dodal launch.json za debuggiranje z Node.js prek Visual Studio Code:
-https://code.visualstudio.com/docs/editor/debugging
+Dodal .json konfiguracijo. Probavam jwt. Dodal mongoose.
